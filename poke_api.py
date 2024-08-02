@@ -3,6 +3,8 @@ Library for interacting with the PokeAPI.
 https://pokeapi.co/
 '''
 import requests
+import image_lib
+import os
 
 POKE_API_URL = 'https://pokeapi.co/api/v2/pokemon/'
 
@@ -10,6 +12,8 @@ def main():
     # Test out the get_pokemon_into() function
     # Use breakpoints to view returned dictionary
     poke_info = get_pokemon_info("Rockruff")
+
+    get_pokemon_list()
     return
 
 def get_pokemon_info(pokemon):
@@ -48,7 +52,53 @@ def get_pokemon_info(pokemon):
 
     # TODO: Define function that gets a list of all Pokemon names from the PokeAPI
 
+def get_pokemon_list(pokemon_limit='3000'):
+    """Get a list of all pokemon
+
+    Args:
+        pokemon_limit (str): Max number of pokemon to get in the list
+    
+    Returns:
+        List of pokemon names  
+    """
+
+    pokemon_list = []
+
+    url = POKE_API_URL + f'?offset=0&limit={pokemon_limit}'
+    
+    re = requests.get(url)
+
+    if re.status_code == requests.codes.ok:
+        data = re.json()
+
+        for item in data['results']:
+            pokemon_list.append(item['name'])
+    else:
+        print('Failure')
+        print(f'Response code: {re.status_code} ({re.reason})')
+
+    return pokemon_list
+
     # TODO: Define function that downloads and saves Pokemon artwork
+
+def download_artwork(pokemon_list, image_dir):
+    """Download pokemon artwork from PokeAPI
+
+    Args:
+        pokemon_list (list): list of pokemon names    
+        image_dir (str): image directory to save file to
+    
+    Returns:
+        Nothing    
+    """
+
+    for item in pokemon_list:
+        pokeInfo = get_pokemon_info(item)
+        imageURL = pokeInfo['sprites']['front_default']
+        imageData = image_lib.download_image(imageURL)
+        imageDir = os.path.join(image_dir, f'{pokeInfo['name']}.png')
+        image_lib.save_image_file(imageData, imageDir)
+    return
 
 if __name__ == '__main__':
     main()
