@@ -42,11 +42,12 @@ def download_icon(icon_url, name):
     imageData = image_lib.download_image(icon_url)
     imageDir = os.path.join(images_dir, name)
     image_lib.save_image_file(imageData, imageDir)
+    
     return imageDir
 
 icon_dir = download_icon(icon_url, 'poke-ball.png')
 
-pokemon_list = poke_api.get_pokemon_list('10')
+pokemon_list = poke_api.get_pokemon_list('25')
 poke_api.download_artwork(pokemon_list, images_dir)
 
 # Create the main window
@@ -62,26 +63,25 @@ root.iconphoto(False, icon)
 
 
 # TODO: Create frames
+root.grid_columnconfigure(0, weight=1)
+root.grid_rowconfigure(0, weight=1)
+root.grid_rowconfigure(1, weight=1)
+root.grid_rowconfigure(2, weight=1)
 
-root.rowconfigure(0, weight=100)
-root.rowconfigure(1, weight=50)
-root.rowconfigure(2, weight=60)
+frm_top = ttk.Frame(root, relief='groove')
+frm_top.grid(row=0, column=0, sticky='nsew')
+frm_top.columnconfigure(0, weight=1)
+frm_top.rowconfigure(0, weight=1)
 
-frm_top = ttk.Frame(root)
-frm_top.grid(row=0, column=0, columnspan=1, sticky=NSEW)
-
-frm_mid = ttk.Frame(root)
-frm_mid.grid(row=1, column=0, columnspan=1, sticky=NSEW)
-
-frm_btm = ttk.Frame(root)
-frm_btm.grid(row=2, column=0, columnspan=1, sticky=NSEW)
+frm_btm = ttk.Frame(root, height=10)
+frm_btm.grid(row=2, column=0, sticky='s')
 
 # TODO: Populate frames with widgets and define event handler functions
 
 def handle_poke_sel(event):
-    
     sel_pkm_index = cbox_img_sel.current()
     icon['file'] =  os.path.join(images_dir, image_list[sel_pkm_index])
+    set_desktop_btn.state(['!disabled'])
     return
 
 def set_desktop():
@@ -91,20 +91,20 @@ def set_desktop():
     return
 
 lbl_image = ttk.Label(frm_top, image=icon)
-lbl_image.grid(padx=10,pady=10)
+lbl_image.grid(row=0, column=0, padx=10,pady=10, sticky='ns')
 
 image_list = []
 for file in os.listdir(images_dir):
     full_path = os.path.join(images_dir, file)
     if os.path.isfile(full_path):
       image_list.append(file)
-    
-cbox_img_sel = ttk.Combobox(frm_mid, values=image_list, state='readonly')
+
+cbox_img_sel = ttk.Combobox(frm_btm, values=image_list, state='readonly')
 cbox_img_sel.grid(row=0,column=0)
 cbox_img_sel.bind('<<ComboboxSelected>>', handle_poke_sel)
+cbox_img_sel.set('Select a Pokemon')
 
-set_desktop_btn = ttk.Button(frm_btm, text="Set Desktop", command=set_desktop)
-set_desktop_btn.grid(row=0,column=0)
-
+set_desktop_btn = ttk.Button(frm_btm, text="Set Desktop", command=set_desktop, state=DISABLED)
+set_desktop_btn.grid(row=1,column=0, pady=10)
 
 root.mainloop()

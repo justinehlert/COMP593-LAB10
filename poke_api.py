@@ -52,7 +52,7 @@ def get_pokemon_info(pokemon):
 
     # TODO: Define function that gets a list of all Pokemon names from the PokeAPI
 
-def get_pokemon_list(pokemon_limit='3000'):
+def get_pokemon_list(pokemon_limit='3000', offset='0'):
     """Get a list of all pokemon
 
     Args:
@@ -61,16 +61,15 @@ def get_pokemon_list(pokemon_limit='3000'):
     Returns:
         List of pokemon names  
     """
-
+    print("Getting a list of Pokemon Names...")
     pokemon_list = []
 
-    url = POKE_API_URL + f'?offset=0&limit={pokemon_limit}'
+    url = POKE_API_URL + f'?offset={offset}&limit={pokemon_limit}'
     
     re = requests.get(url)
 
     if re.status_code == requests.codes.ok:
         data = re.json()
-
         for item in data['results']:
             pokemon_list.append(item['name'])
     else:
@@ -94,10 +93,13 @@ def download_artwork(pokemon_list, image_dir):
 
     for item in pokemon_list:
         pokeInfo = get_pokemon_info(item)
-        imageURL = pokeInfo['sprites']['front_default']
-        imageData = image_lib.download_image(imageURL)
         imageDir = os.path.join(image_dir, f'{pokeInfo['name']}.png')
-        image_lib.save_image_file(imageData, imageDir)
+        if os.path.exists(imageDir):
+            print("FIle Already Saved!")
+        else:
+            imageURL = pokeInfo['sprites']['front_default']
+            imageData = image_lib.download_image(imageURL)            
+            image_lib.save_image_file(imageData, imageDir)
     return
 
 if __name__ == '__main__':
