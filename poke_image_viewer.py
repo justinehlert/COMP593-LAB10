@@ -8,6 +8,7 @@ Usage:
 """
 from tkinter import *
 from tkinter import ttk
+from PIL import ImageTk, Image
 import tkinter as tk
 import os
 import ctypes
@@ -58,8 +59,11 @@ root.title("Pokemon Viewer")
 app_id = 'COMP593.PokemonImageViewer'
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
 
-icon = tk.PhotoImage(file=icon_dir)
+image = Image.open(icon_dir)
+image = image.resize((400, 200))
+icon = ImageTk.PhotoImage(image)
 root.iconphoto(False, icon)
+img = ImageTk.PhotoImage(image)
 
 
 # TODO: Create frames
@@ -76,22 +80,29 @@ frm_top.rowconfigure(0, weight=1)
 frm_btm = ttk.Frame(root, height=10)
 frm_btm.grid(row=2, column=0, sticky='s')
 
-# TODO: Populate frames with widgets and define event handler functions
+# Populate frames with widgets and define event handler functions
 
 def handle_poke_sel(event):
+    global img
     sel_pkm_index = cbox_img_sel.current()
-    icon['file'] =  os.path.join(images_dir, image_list[sel_pkm_index])
+    path = os.path.join(images_dir, image_list[sel_pkm_index])
+    image = Image.open(path)
+    image = image.resize((400, 200))
+    img = ImageTk.PhotoImage(image)
+    lbl_image.config(image=img)
     set_desktop_btn.state(['!disabled'])
     return
 
 def set_desktop():
-    sel_pkm_index = cbox_img_sel.current()
-    icon = os.path.join(images_dir, image_list[sel_pkm_index])
+    sel_img_index = cbox_img_sel.current()
+    icon = os.path.join(images_dir, image_list[sel_img_index])
     image_lib.set_desktop_background_image(image_path=icon)
     return
 
 lbl_image = ttk.Label(frm_top, image=icon)
 lbl_image.grid(row=0, column=0, padx=10,pady=10, sticky='ns')
+
+lbl_image.image = img
 
 image_list = []
 for file in os.listdir(images_dir):
